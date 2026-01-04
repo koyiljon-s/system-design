@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: go-app
+    container_name: go-user-service
     env_file:
       - .env
     ports:

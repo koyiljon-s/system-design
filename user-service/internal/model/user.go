@@ -2,10 +2,8 @@
 package model
 
 import (
-	"time"
 	"gorm.io/gorm"
-	"gorm.io/driver/postgres"
-	"user-service/internal/service/utils"
+	"primejobs/user-service/internal/service/utils"
 )
 
 type User struct {
