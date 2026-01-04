@@ -1,5 +1,5 @@
 # Dockerfile
-FROM golang:1.23-alpine AS builder
+FROM golang:1.25-alpine AS builder
 
 WORKDIR /app
 
@@ -10,9 +10,7 @@ RUN go mod download
 # Copy source code
 COPY . .
 
-
-RUN CGO_ENABLED=0 GOOS=linux go build -o /go-app ./cmd/server/main.go
-
+RUN CGO_ENABLED=0 GOOS=linux go build -o /go-app ./cmd/api/main.go
 
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates tzdata
@@ -26,5 +24,4 @@ COPY --from=builder /go-app .
 # COPY .env .
 
 EXPOSE 8080
-
 CMD ["./go-app"]
