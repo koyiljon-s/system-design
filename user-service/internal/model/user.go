@@ -2,12 +2,21 @@
 package model
 
 import (
+	"time"
 	"gorm.io/gorm"
 	"primejobs/user-service/internal/service/utils"
+	"github.com/google/uuid"
 )
 
+type BaseModel struct {
+	ID             uuid.UUID      `gorm:"type:uuid;primaryKey;default:gen_random_uuid()"`
+	CreatedAT      time.Time
+	UpdatedAt      time.Time
+	DeletedAt      gorm.DeletedAt `gorm:"index"`
+}
+
 type User struct {
-	gorm.Model     // Includes: ID (uint), CreatedAt (time.Time), UpdatedAt (time.Time), DeletedAt (gorm.DeletedAt)
+	BaseModel      
 	Name           string        `gorm:"type:varchar(100);not null" json:"name"`
 	Email          string        `gorm:"type:varchar(100);uniqueIndex;not null" json:"email"`
 	PasswordHash   string        `gorm:"column:password_hash;type:varchar(255);not null" json:"-"`

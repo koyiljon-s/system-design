@@ -1,41 +1,53 @@
-// internal/service/jwt/jwt.go
 package jwt
 
 import (
+	"errors"
 	"os"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/google/uuid"
 )
 
-var jwtSecret = []byte(os.Getenv("JWT_SECRET")) 
+var jwtSecret = []byte(os.Getenv("JWT_SECRET"))
 
 // GenerateToken creates a new JWT token for a user ID
-func GenerateToken(userID uint) (string, error) {
+func GenerateToken(userID uuid.UUID) (string, error) {
 	claims := jwt.MapClaims{
-		"user_id": userID,
-		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(), // 7 days expiry
+		"user_id": userID.String(), 
+		"exp":     time.Now().Add(time.Hour * 24 * 7).Unix(), // 7 days
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 	return token.SignedString(jwtSecret)
 }
 
-// ValidateToken checks if a token is valid and returns the user ID
-func ValidateToken(tokenString string) (uint, error) {
+func ValidateToken(tokenString string) (uuid.UUID, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, jwt.ErrSignatureInvalid
+		}
 		return jwtSecret, nil
 	})
 
 	if err != nil || !token.Valid {
-		return 0, err
+		return uuid.Nil, err
 	}
 
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, jwt.ErrTokenInvalidClaims
+		return uuid.Nil, jwt.ErrTokenInvalidClaims
 	}
 
-	userID := uint(claims["user_id"].(float64))
+	userIDStr, ok := claims["user_id"].(string)
+	if !ok {
+		return uuid.Nil, errors.New("invalid user_id in token")
+	}
+
+	userID, err := uuid.Parse(userIDStr)
+	if err != nil {
+		return uuid.Nil, err
+	}
+
 	return userID, nil
 }
