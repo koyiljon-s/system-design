@@ -22,18 +22,28 @@ func main() {
 	userHandler := handler.NewUserHandler(userRepo)
 
 	// Create Gin router
-	r := gin.Default() // Includes logger and recovery middleware
+	r := gin.Default() 
 
 	// Public routes
-	r.POST("/api/register", userHandler.Register)
-	r.POST("/api/login", userHandler.Login)
-
-	protected := r.Group("/api")
+	api := r.Group("/api")
+	{
+		api.POST("/register", userHandler.Register)
+		api.POST("/login", userHandler.Login)
+	}
+   
+    
+	protected := api.Group("/")
     protected.Use(middleware.AuthMiddleware())
 	{
-	  protected.GET("/me", userHandler.GetMe)
+		protected.GET("/me", userHandler.GetMe)
+		protected.PUT("/me", userHandler.UpdateMe)
+		protected.DELETE("/me", userHandler.DeleteMe)
+        // internal usage
+		protected.GET("/users/:id", userHandler.GetUserByID)
     }
 
 	log.Println("Server running on http://localhost:8080")
-	r.Run(":8080")
+	if err := r.Run(":8080"); err != nil {
+		log.Fatal("Server failed to start:", err)
+	}
 }
