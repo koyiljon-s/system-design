@@ -13,6 +13,7 @@ import (
 )
 
 func main() {
+
 	// Connect to database
 	if err := database.Connect(); err != nil {
 		log.Fatal("Database connection failed:", err)
@@ -20,6 +21,9 @@ func main() {
 
 	userRepo := repository.NewUserRepository()
 	userHandler := handler.NewUserHandler(userRepo)
+	oauthHandler := handler.NewOAuthHandler(userRepo)
+
+    gin.SetMode(gin.ReleaseMode)
 
 	// Create Gin router
 	r := gin.Default() 
@@ -29,6 +33,9 @@ func main() {
 	{
 		api.POST("/register", userHandler.Register)
 		api.POST("/login", userHandler.Login)
+
+		api.GET("/oauth/google", oauthHandler.GoogleLogin)
+		api.GET("/oauth/google/callback", oauthHandler.GoogleCallback)
 	}
    
     
@@ -43,7 +50,7 @@ func main() {
     }
 
 	log.Println("Server running on http://localhost:8080")
-	if err := r.Run(":8080"); err != nil {
+	if err := r.Run(":8000"); err != nil {
 		log.Fatal("Server failed to start:", err)
 	}
 }
