@@ -10,14 +10,19 @@ A Go-based microservice for user management using Gin framework, PostgreSQL, and
 ## Setup
 
 1. Clone the repository and navigate to the user-service directory:
+
    ```bash
+   git clone https://github.com/koyiljon-s/system-design.git
    cd user-service
    ```
 
 2. Copy the environment file and update the values:
+
    ```bash
    cp .env.example .env
+
    ```
+
    Edit `.env` with your database credentials and JWT secret.
 
 ## Running the Application
@@ -30,8 +35,7 @@ This will start both the PostgreSQL database and the Go application:
 docker-compose up --build
 ```
 
-The service will be available at `http://localhost:8080`.
-
+The service will be available at `http://localhost:8000`.
 
 ## API Endpoints
 
