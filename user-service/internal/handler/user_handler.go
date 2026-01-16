@@ -58,8 +58,8 @@ func (h *UserHandler) Register(c *gin.Context) {
 	user := &model.User{
 		Name:         input.Name,
 		Email:        input.Email,
-		PasswordHash: hashedPassword,
 	}
+	user.PasswordHash = &hashedPassword
 
 	if err := h.userRepo.Create(user); err != nil {
 		c.JSON(http.StatusConflict, gin.H{"error": "Email already exists"})
@@ -91,7 +91,7 @@ func (h *UserHandler) Login(c *gin.Context) {
 	}
 
 	user, err := h.userRepo.FindByEmail(input.Email)
-	if err != nil || !utils.CheckPasswordHash(input.Password, user.PasswordHash) {
+	if err != nil || user.PasswordHash == nil || !utils.CheckPasswordHash(input.Password, *user.PasswordHash)  {
 		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
 		return
 	}
@@ -179,7 +179,7 @@ func (h *UserHandler) UpdateMe(c *gin.Context) {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "Password hashing failed"})
 			return
 		}
-		user.PasswordHash = hashed
+		user.PasswordHash = &hashed
 	}
 
 	if err := h.userRepo.Update(user); err != nil {
